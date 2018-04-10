@@ -1,15 +1,22 @@
 package com.software.osirisgadson.internetradioapp.ui.activity;
 
+import android.app.SearchManager;
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.software.osirisgadson.internetradioapp.R;
@@ -19,12 +26,18 @@ import com.software.osirisgadson.internetradioapp.ui.BaseView;
 import com.software.osirisgadson.internetradioapp.ui.adapter.RadioChannelListAdapter;
 import com.software.osirisgadson.internetradioapp.ui.viewmodel.RadioChannelViewModel;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.Observable;
 import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements BaseView, RadioChannelListAdapter.OnItemClickedListener {
 
@@ -49,12 +62,11 @@ public class MainActivity extends AppCompatActivity implements BaseView, RadioCh
         ButterKnife.bind(this);
 
         radioChannelViewModel = ViewModelProviders.of(this).get(RadioChannelViewModel.class);
+
+        getRadioChannels();
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
+    private void getRadioChannels() {
         radioChannelViewModel.getRadioChannels(new Observer<Channels>() {
             @Override
             public void onSubscribe(Disposable d) {
@@ -68,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements BaseView, RadioCh
 
             @Override
             public void onError(Throwable e) {
-                hideLoading();
                 Log.d(ERROR_TAG, "onError: " + e.getMessage());
                 showError(e.getMessage());
             }
@@ -86,6 +97,52 @@ public class MainActivity extends AppCompatActivity implements BaseView, RadioCh
         recyclerViewRadioChannelList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         radioChannelListAdapter = new RadioChannelListAdapter(this, channelsList, this);
         recyclerViewRadioChannelList.setAdapter(radioChannelListAdapter);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+
+        // Get the SearchView and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                radioChannelViewModel.getRadioChannelsByFilter(newText, new Observer<Channels>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Channels channels) {
+                        setChannelsList(channels.getChannels());
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(ERROR_TAG, "onError: " + e.getMessage());
+                        showError(e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+                return true;
+            }
+        });
+
+        return true;
     }
 
     @Override

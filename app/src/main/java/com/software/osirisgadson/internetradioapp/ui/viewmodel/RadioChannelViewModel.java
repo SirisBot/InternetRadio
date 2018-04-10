@@ -6,10 +6,16 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.software.osirisgadson.internetradioapp.data.model.Channel;
 import com.software.osirisgadson.internetradioapp.data.model.Channels;
 import com.software.osirisgadson.internetradioapp.data.network.radio.RadioUtil;
 import com.software.osirisgadson.internetradioapp.di.DaggerMainComponent;
 import com.software.osirisgadson.internetradioapp.di.MainModule;
+
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -44,6 +50,26 @@ public class RadioChannelViewModel extends AndroidViewModel {
         if (channelsObservable != null) {
             channelsObservable.subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(channelsObserver);
+        }
+    }
+
+    public void getRadioChannelsByFilter(String search, Observer<Channels> channelsObserver) {
+        channelsObservable = radioUtil.getService().getRadioChannels();
+        if (channelsObservable != null) {
+            channelsObservable.subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .debounce(2000, TimeUnit.MILLISECONDS)
+                    .filter(channels -> {
+                        Iterator<Channel> channelList = channels.getChannels().iterator();
+                        while (channelList.hasNext()) {
+                            Channel channel = channelList.next();
+                            if (!StringUtils.containsIgnoreCase(channel.getDj(), search)) {
+                                channelList.remove();
+                            }
+                        }
+                        return true;
+                    })
                     .subscribe(channelsObserver);
         }
     }
