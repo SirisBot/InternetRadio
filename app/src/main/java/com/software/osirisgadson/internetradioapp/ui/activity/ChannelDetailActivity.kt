@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.software.osirisgadson.internetradioapp.R
 import com.software.osirisgadson.internetradioapp.data.model.Channel
-import com.software.osirisgadson.internetradioapp.ui.activity.MainActivity.CHANNEL_EXTRA
+import com.software.osirisgadson.internetradioapp.ui.activity.ChannelListActivity.CHANNEL_EXTRA
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_channel_detail.*
 

@@ -1,6 +1,7 @@
 package com.software.osirisgadson.internetradioapp.ui.activity;
 
 import android.app.SearchManager;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +10,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -28,12 +28,9 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
 
-public class MainActivity extends AppCompatActivity implements BaseView, RadioChannelListAdapter.OnItemClickedListener {
+public class ChannelListActivity extends AppCompatActivity implements BaseView, RadioChannelListAdapter.OnItemClickedListener {
 
-    private static final String ERROR_TAG = "error";
     public static final String CHANNEL_EXTRA = "channel";
 
     @BindView(R.id.rv_radio_channel_list)
@@ -58,33 +55,23 @@ public class MainActivity extends AppCompatActivity implements BaseView, RadioCh
 
         radioChannelViewModel = ViewModelProviders.of(this).get(RadioChannelViewModel.class);
 
+        subscribeChannelListUpdates();
         getRadioChannels();
     }
 
+    //observe changes to viewmodel livedata object
+    private void subscribeChannelListUpdates() {
+        showLoading();
+        final Observer<List<Channel>> observerChannelList = this::setChannelsList;
+        radioChannelViewModel.liveDataChannelList.observe(this, observerChannelList);
+    }
+
     private void getRadioChannels() {
-        radioChannelViewModel.getRadioChannels(new Observer<Channels>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-                showLoading();
-            }
+        radioChannelViewModel.getRadioChannels();
+    }
 
-            @Override
-            public void onNext(Channels channels) {
-                setChannelsList(channels.getChannels());
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                //ideally log to an analytics sdk like Crashlytics
-                Log.d(ERROR_TAG, "onError: " + e.getMessage());
-                showError(e.getMessage());
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        });
+    private void getFilteredChannels(String filter) {
+        radioChannelViewModel.getRadioChannelsByFilter(filter);
     }
 
     private void setChannelsList(List<Channel> channelsList) {
@@ -109,29 +96,7 @@ public class MainActivity extends AppCompatActivity implements BaseView, RadioCh
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                radioChannelViewModel.getRadioChannelsByFilter(newText, new Observer<Channels>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(Channels channels) {
-                        setChannelsList(channels.getChannels());
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        //log to an analytics sdk like Crashlytics
-                        Log.d(ERROR_TAG, "onError: " + e.getMessage());
-                        showError(e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
+                getFilteredChannels(newText);
                 return true;
             }
         });

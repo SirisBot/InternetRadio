@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.software.osirisgadson.internetradioapp.ui.activity.MainActivity">
+    tools:context="com.software.osirisgadson.internetradioapp.ui.activity.ChannelListActivity">
 
     <ProgressBar
         android:id="@+id/pb_channel_list"

@@ -32,10 +32,10 @@ import static org.hamcrest.Matchers.is;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class MainActivityFilterTest {
+public class ChannelListActivityFilterTest {
 
     @Rule
-    public ActivityTestRule<MainActivity> mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
+    public ActivityTestRule<ChannelListActivity> mActivityTestRule = new ActivityTestRule<>(ChannelListActivity.class);
 
     @Test
     public void mainActivityFilterTest() {

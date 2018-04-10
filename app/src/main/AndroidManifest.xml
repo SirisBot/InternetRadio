@@ -11,7 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.activity.MainActivity">
+        <activity android:name=".ui.activity.ChannelListActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,10 +23,10 @@
                 android:resource="@xml/searchable"/>
         </activity>
         <activity android:name=".ui.activity.ChannelDetailActivity"
-            android:parentActivityName="com.software.osirisgadson.internetradioapp.ui.activity.MainActivity">
+            android:parentActivityName="com.software.osirisgadson.internetradioapp.ui.activity.ChannelListActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.software.osirisgadson.internetradioapp.ui.activity.MainActivity" />
+                android:value="com.software.osirisgadson.internetradioapp.ui.activity.ChannelListActivity" />
             </activity>
     </application>
 
