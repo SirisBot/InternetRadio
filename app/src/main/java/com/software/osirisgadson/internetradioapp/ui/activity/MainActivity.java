@@ -1,12 +1,10 @@
 package com.software.osirisgadson.internetradioapp.ui.activity;
 
 import android.app.SearchManager;
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -26,18 +24,12 @@ import com.software.osirisgadson.internetradioapp.ui.BaseView;
 import com.software.osirisgadson.internetradioapp.ui.adapter.RadioChannelListAdapter;
 import com.software.osirisgadson.internetradioapp.ui.viewmodel.RadioChannelViewModel;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.Observable;
 import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements BaseView, RadioChannelListAdapter.OnItemClickedListener {
 
@@ -61,6 +53,9 @@ public class MainActivity extends AppCompatActivity implements BaseView, RadioCh
 
         ButterKnife.bind(this);
 
+        recyclerViewRadioChannelList.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewRadioChannelList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+
         radioChannelViewModel = ViewModelProviders.of(this).get(RadioChannelViewModel.class);
 
         getRadioChannels();
@@ -80,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements BaseView, RadioCh
 
             @Override
             public void onError(Throwable e) {
+                //ideally log to an analytics sdk like Crashlytics
                 Log.d(ERROR_TAG, "onError: " + e.getMessage());
                 showError(e.getMessage());
             }
@@ -93,8 +89,6 @@ public class MainActivity extends AppCompatActivity implements BaseView, RadioCh
 
     private void setChannelsList(List<Channel> channelsList) {
         hideLoading();
-        recyclerViewRadioChannelList.setLayoutManager(new LinearLayoutManager(this));
-        recyclerViewRadioChannelList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         radioChannelListAdapter = new RadioChannelListAdapter(this, channelsList, this);
         recyclerViewRadioChannelList.setAdapter(radioChannelListAdapter);
     }
@@ -104,7 +98,6 @@ public class MainActivity extends AppCompatActivity implements BaseView, RadioCh
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.options_menu, menu);
 
-        // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
@@ -129,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements BaseView, RadioCh
 
                     @Override
                     public void onError(Throwable e) {
+                        //log to an analytics sdk like Crashlytics
                         Log.d(ERROR_TAG, "onError: " + e.getMessage());
                         showError(e.getMessage());
                     }
@@ -168,10 +162,5 @@ public class MainActivity extends AppCompatActivity implements BaseView, RadioCh
         Intent intent = new Intent(this, ChannelDetailActivity.class);
         intent.putExtra(CHANNEL_EXTRA, channel);
         startActivity(intent);
-    }
-
-    @Override
-    public void onClick(View v) {
-
     }
 }

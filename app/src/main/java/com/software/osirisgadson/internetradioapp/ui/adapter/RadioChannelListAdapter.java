@@ -24,7 +24,7 @@ public class RadioChannelListAdapter extends RecyclerView.Adapter<RadioChannelLi
     private List<Channel> channels;
     private OnItemClickedListener onItemClickedListener;
 
-    public interface OnItemClickedListener extends View.OnClickListener {
+    public interface OnItemClickedListener {
         void onClicked(Channel channel);
     }
 
@@ -51,12 +51,7 @@ public class RadioChannelListAdapter extends RecyclerView.Adapter<RadioChannelLi
         holder.textViewChannelTitle.setText(channel.getTitle());
         holder.textViewChannelDesc.setText(channel.getDescription());
         holder.textViewChannelDj.setText(channel.getDj());
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onItemClickedListener.onClicked(channel);
-            }
-        });
+        holder.itemView.setOnClickListener(v -> onItemClickedListener.onClicked(channel));
     }
 
     @Override
