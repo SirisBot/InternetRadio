@@ -10,9 +10,9 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
-import static org.junit.Assert.assertTrue;
+import io.reactivex.subscribers.TestSubscriber;
 
-import io.reactivex.observers.TestObserver;
+import static org.junit.Assert.assertTrue;
 
 public class RadioServiceTest {
 
@@ -20,11 +20,11 @@ public class RadioServiceTest {
     @Test
     public void getRadioChannels() {
         RadioUtil radioUtil = new RadioUtil();
-        TestObserver<Channels> testObserver = radioUtil.getService().getRadioChannels().test();
-        testObserver.assertNoErrors();
-        testObserver.assertSubscribed();
-        testObserver.assertComplete();
-        assertTrue(!testObserver.values().isEmpty());
+        TestSubscriber<Channels> testSubscriber = radioUtil.getService().getRadioChannels().test();
+        testSubscriber.assertNoErrors();
+        testSubscriber.assertSubscribed();
+        testSubscriber.assertComplete();
+        assertTrue(!testSubscriber.values().isEmpty());
     }
 
     @Test
@@ -34,21 +34,41 @@ public class RadioServiceTest {
         String filter = "elise";
 
         RadioUtil radioUtil = new RadioUtil();
-        TestObserver<Channels> testObserver = radioUtil.getService()
+        TestSubscriber<Channels> testSubscriber = radioUtil.getService()
                 .getRadioChannels()
                 .filter(channels -> {
-            Iterator<Channel> channelList = channels.getChannels().iterator();
-            while (channelList.hasNext()) {
-                Channel channel = channelList.next();
-                if (!StringUtils.containsIgnoreCase(channel.getDj(), filter)) {
-                    channelList.remove();
-                }
-            }
-            return true;
-        }).test();
-        testObserver.assertNoErrors();
-        testObserver.assertSubscribed();
-        testObserver.assertComplete();
-        assertTrue(StringUtils.equalsAnyIgnoreCase(filter, testObserver.values().get(0).getChannels().get(0).getDj()));
+                    Iterator<Channel> channelList = channels.getChannels().iterator();
+                    while (channelList.hasNext()) {
+                        Channel channel = channelList.next();
+                        if (!StringUtils.containsIgnoreCase(channel.getDj(), filter)) {
+                            channelList.remove();
+                        }
+                    }
+                    return true;
+                }).test();
+        testSubscriber.assertNoErrors();
+        testSubscriber.assertSubscribed();
+        testSubscriber.assertComplete();
+        assertTrue(StringUtils.equalsAnyIgnoreCase(filter, testSubscriber.values().get(0).getChannels().get(0).getDj()));
+    }
+
+    @Test
+    public void getChannels_Offline_hasData() {
+
+    }
+
+    @Test
+    public void getChannels_Offline_hasNoData() {
+
+    }
+
+    @Test
+    public void getChannelsOnline_hasData_getLocalCache() {
+
+    }
+
+    @Test
+    public void getChannelsOnline_hasNoData_getRemoteData() {
+
     }
 }
